@@ -1,23 +1,45 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from "react";
+import Header from "./components/Header";
+import VideoGrid from "./components/VideoGrid";
+import AgeVerificationModal from "./components/AgeVerificationModal";
 
 function App() {
+  const [showModal, setShowModal] = useState(true);
+
+  useEffect(() => {
+    // Check if user was previously verified (stored in session)
+    const verified = sessionStorage.getItem("ageVerified");
+    if (verified === "true") {
+      setShowModal(false);
+    }
+  }, []);
+
+  const handleVerificationSuccess = (userData) => {
+    setShowModal(false);
+    sessionStorage.setItem("ageVerified", "true");
+    sessionStorage.setItem("userGender", userData.gender);
+  };
+
+  const handleSkipVerification = () => {
+    // For testing purposes only
+    setShowModal(false);
+  };
+
+  const handleLogout = () => {
+    sessionStorage.clear();
+    setShowModal(true);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="min-h-screen bg-[#0f0f0f]">
+      <Header onLogout={handleLogout} isVerified={!showModal} />
+      {showModal && (
+        <AgeVerificationModal
+          onVerified={handleVerificationSuccess}
+          onSkip={handleSkipVerification}
+        />
+      )}
+      {!showModal && <VideoGrid />}
     </div>
   );
 }

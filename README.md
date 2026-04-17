@@ -1,43 +1,101 @@
-# Getting Started with Create React App
+# Age Verification YouTube Clone (React + Tailwind CSS)
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A modern React-based video platform with facial age verification using AI and styled with Tailwind CSS.
 
-## Available Scripts
+## 🚀 Features
 
-In the project directory, you can run:
+- 🎥 **YouTube-like Interface** - Modern dark theme video grid
+- 📸 **Real-time Facial Recognition** - Webcam-based age verification
+- 🔐 **18+ Age Gate** - Blocks access for users under 18
+- 🤖 **AI-Powered** - Integration with FastAPI backend
+- 💾 **Session Storage** - No repeated verification needed
+- 🎨 **Tailwind CSS** - Beautiful, responsive utility-first styling
 
-### `npm start`
+## 📦 Installation
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### 1. Install Dependencies
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+```bash
+cd frontend
+npm install
+```
 
-### `npm test`
+### 2. Start Backend API
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Make sure your FastAPI server is running:
 
-### `npm run build`
+```bash
+# In the project root directory
+cd ..
+python app.py
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+The API should be accessible at `http://localhost:8000`
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### 3. Start React App
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```bash
+npm start
+```
 
-### `npm run eject`
+Opens at `http://localhost:3000`
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## 🎯 How It Works
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+1. **Initial Visit** → Age verification modal appears
+2. **Camera Permission** → User grants webcam access
+3. **Capture Photo** → Click button to take facial photo
+4. **AI Processing** → Sends image to FastAPI backend
+5. **Age Prediction** → AI model analyzes and predicts age/gender
+6. **Access Decision**:
+   - ✅ Age ≥ 18 → Access granted
+   - ❌ Age < 18 → Access denied
+7. **Session Persistence** → Verified users bypass future checks
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## 🛠️ Tech Stack
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+- **React 18** - Frontend framework
+- **Tailwind CSS** - Utility-first CSS framework
+- **react-webcam** - Webcam capture component
+- **axios** - HTTP client for API calls
+- **FastAPI** - Backend API (Python)
+- **TensorFlow** - AI model (backend)
+
+## 📝 API Endpoints
+
+- `POST /predict/both` - Predicts age and gender from facial image
+
+## 🧪 Testing
+
+Use the **"Skip (Testing Only)"** button to bypass verification during development.
+
+## 🎨 Tailwind Configuration
+
+The project uses custom Tailwind colors:
+
+- Background: `#0f0f0f`
+- Headers: `#212121`
+- Accent: Purple gradient (`purple-500` to `purple-700`)
+
+## 🔐 Security Notes
+
+**This is a demo/prototype.** For production deployment:
+
+- ✅ Add authentication & authorization
+- ✅ Implement rate limiting
+- ✅ Store verification audit logs
+- ✅ Add liveness detection (prevent photo spoofing)
+- ✅ Use HTTPS for all requests
+- ✅ Configure proper CORS policies
+- ✅ Add data privacy compliance (GDPR, CCPA)
+
+## 📱 Responsive Design
+
+Fully responsive grid layout:
+
+- **Mobile**: 1 column
+- **Tablet**: 2 columns
+- **Desktop**: 3-4 columns
 
 ## Learn More
 
