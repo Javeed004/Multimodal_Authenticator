@@ -1,43 +1,63 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+env/
 
-# dependencies
-/node_modules
-/.pnp
-.pnp.js
+# Node / React
+frontend/node_modules/
+frontend/build/
+frontend/coverage/
+frontend/.cache/
+frontend/.expo/
+frontend/src/.expo/
 
-# testing
-/coverage
-
-# production
-/build
-
-# misc
-.DS_Store
-Thumbs.db
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+# Environment files
 .env
 .env.*
 !.env.example
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
 
-# app caches and temp files
-.expo/
-.expo-shared/
-src/.expo/
-.cache/
-.parcel-cache/
-.vite/
-dist/
-out/
-*.tsbuildinfo
-
-# IDE
-.vscode/
-.idea/
-
+# Runtime logs and local output
+.runlogs/
+*.log
 npm-debug.log*
 yarn-debug.log*
-yarn-error.log*
 pnpm-debug.log*
+
+# Large local ML assets and datasets
+models/
+data/
+UTKFace/
+archive/
+*.keras
+*.caffemodel
+*.pb
+*.pkl
+*.zip
+*.rar
+
+# Generated/downloaded duplicate source bundles
+multi_model_based_authentication-main/
+
+# Local agent/config metadata
+.agents/
+.codex/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+nul
+~$*
+
+# Local reports and loose experiment artifacts
+*.doc
+*.docx
+Copy of Untitled9.ipynb
+download.png

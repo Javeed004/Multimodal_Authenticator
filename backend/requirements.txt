@@ -1,0 +1,12 @@
+fastapi==0.115.0
+uvicorn==0.30.6
+tensorflow==2.18.0
+pillow==11.0.0
+numpy==1.26.4
+python-multipart==0.0.18
+opencv-python==4.10.0.84
+opencv-contrib-python==4.10.0.84
+librosa==0.10.2.post1
+scikit-learn==1.5.2
+joblib==1.4.2
+soundfile==0.12.1

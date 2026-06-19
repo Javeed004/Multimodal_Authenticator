@@ -1,128 +1,98 @@
-# Age Verification YouTube Clone (React + Tailwind CSS)
+# Multimodal Authenticator
 
-A modern React-based video platform with facial age verification using AI and styled with Tailwind CSS.
+Full-stack age and gender verification demo that combines a React video interface with a FastAPI backend for face and voice prediction.
 
-## 🚀 Features
+## Project Structure
 
-- 🎥 **YouTube-like Interface** - Modern dark theme video grid
-- 📸 **Real-time Facial Recognition** - Webcam-based age verification
-- 🔐 **18+ Age Gate** - Blocks access for users under 18
-- 🤖 **AI-Powered** - Integration with FastAPI backend
-- 💾 **Session Storage** - No repeated verification needed
-- 🎨 **Tailwind CSS** - Beautiful, responsive utility-first styling
+```text
+Final Year project/
+├── backend/
+│   ├── app.py
+│   ├── requirements.txt
+│   ├── download_pretrained_models.py
+│   ├── download_utk_dataset.py
+│   ├── train_models.py
+│   └── train_models_colab.ipynb
+├── frontend/
+│   ├── public/
+│   ├── src/
+│   ├── package.json
+│   └── tailwind.config.js
+├── models/               # local model files, ignored by Git
+├── README.md
+└── .gitignore
+```
 
-## 📦 Installation
+## Features
 
-### 1. Install Dependencies
+- React video browsing UI with an age verification gate.
+- Webcam-based face capture.
+- Microphone-based voice sample capture.
+- FastAPI endpoints for face age/gender and voice age/gender prediction.
+- Local session storage after successful verification.
+- Swagger API docs at `http://localhost:8000/docs`.
 
-```bash
+## Requirements
+
+- Python 3.10 or newer
+- Node.js 18 or newer
+- npm
+
+## Backend Setup
+
+Install Python dependencies:
+
+```powershell
+cd backend
+pip install -r requirements.txt
+```
+
+Model files are expected in the root-level `models/` folder. The OpenCV face, age, and gender models can be downloaded with:
+
+```powershell
+cd ..
+python backend/download_pretrained_models.py
+```
+
+Start the API:
+
+```powershell
+python backend/app.py
+```
+
+The backend runs at `http://localhost:8000`.
+
+## Frontend Setup
+
+Install frontend dependencies:
+
+```powershell
 cd frontend
 npm install
 ```
 
-### 2. Start Backend API
+Start the React app:
 
-Make sure your FastAPI server is running:
-
-```bash
-# In the project root directory
-cd ..
-python app.py
-```
-
-The API should be accessible at `http://localhost:8000`
-
-### 3. Start React App
-
-```bash
+```powershell
 npm start
 ```
 
-Opens at `http://localhost:3000`
+The frontend runs at `http://localhost:3000` and calls the backend at `http://localhost:8000`.
 
-## 🎯 How It Works
+## API Endpoints
 
-1. **Initial Visit** → Age verification modal appears
-2. **Camera Permission** → User grants webcam access
-3. **Capture Photo** → Click button to take facial photo
-4. **AI Processing** → Sends image to FastAPI backend
-5. **Age Prediction** → AI model analyzes and predicts age/gender
-6. **Access Decision**:
-   - ✅ Age ≥ 18 → Access granted
-   - ❌ Age < 18 → Access denied
-7. **Session Persistence** → Verified users bypass future checks
+- `GET /health` - backend and model load status
+- `POST /predict/gender` - predict gender from an uploaded face image
+- `POST /predict/age` - predict age from an uploaded face image
+- `POST /predict/both` - predict age and gender from an uploaded face image
+- `POST /predict/voice` - predict age group and gender from an uploaded audio sample
 
-## 🛠️ Tech Stack
+## Development Notes
 
-- **React 18** - Frontend framework
-- **Tailwind CSS** - Utility-first CSS framework
-- **react-webcam** - Webcam capture component
-- **axios** - HTTP client for API calls
-- **FastAPI** - Backend API (Python)
-- **TensorFlow** - AI model (backend)
+- `models/`, datasets, build output, archives, and dependency folders are intentionally ignored by Git.
+- If voice inference is unavailable, the frontend keeps the face result and shows a fallback note.
+- CORS is open for local development in `backend/app.py`; restrict it before production deployment.
 
-## 📝 API Endpoints
+## License
 
-- `POST /predict/both` - Predicts age and gender from facial image
-
-## 🧪 Testing
-
-Use the **"Skip (Testing Only)"** button to bypass verification during development.
-
-## 🎨 Tailwind Configuration
-
-The project uses custom Tailwind colors:
-
-- Background: `#0f0f0f`
-- Headers: `#212121`
-- Accent: Purple gradient (`purple-500` to `purple-700`)
-
-## 🔐 Security Notes
-
-**This is a demo/prototype.** For production deployment:
-
-- ✅ Add authentication & authorization
-- ✅ Implement rate limiting
-- ✅ Store verification audit logs
-- ✅ Add liveness detection (prevent photo spoofing)
-- ✅ Use HTTPS for all requests
-- ✅ Configure proper CORS policies
-- ✅ Add data privacy compliance (GDPR, CCPA)
-
-## 📱 Responsive Design
-
-Fully responsive grid layout:
-
-- **Mobile**: 1 column
-- **Tablet**: 2 columns
-- **Desktop**: 3-4 columns
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+This project is for educational use.

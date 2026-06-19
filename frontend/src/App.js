@@ -16,8 +16,16 @@ function App() {
 
   const handleVerificationSuccess = (userData) => {
     setShowModal(false);
+    const userAge =
+      userData?.predicted_age || userData?.face?.predicted_age || 25;
+    const userGender = userData?.gender || userData?.face?.gender || "Unknown";
     sessionStorage.setItem("ageVerified", "true");
-    sessionStorage.setItem("userGender", userData.gender);
+    sessionStorage.setItem("userAge", String(userAge));
+    sessionStorage.setItem("userGender", userGender);
+    sessionStorage.setItem(
+      "verificationMode",
+      userData?.forced ? "forced-accept" : "model",
+    );
   };
 
   const handleSkipVerification = () => {

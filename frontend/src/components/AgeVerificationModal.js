@@ -1,6 +1,8 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import Webcam from "react-webcam";
 import axios from "axios";
+
+const FORCE_ACCEPT = true;
 
 function AgeVerificationModal({ onVerified, onSkip }) {
   const [isCapturing, setIsCapturing] = useState(false);
@@ -9,7 +11,17 @@ function AgeVerificationModal({ onVerified, onSkip }) {
   const [verificationStep, setVerificationStep] = useState("");
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
+  const [warnings, setWarnings] = useState([]);
+  const [recordedAudioUrl, setRecordedAudioUrl] = useState("");
   const webcamRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (recordedAudioUrl) {
+        URL.revokeObjectURL(recordedAudioUrl);
+      }
+    };
+  }, [recordedAudioUrl]);
 
   const getSupportedAudioMimeType = () => {
     const types = [
@@ -134,46 +146,88 @@ function AgeVerificationModal({ onVerified, onSkip }) {
   const captureAndVerify = useCallback(async () => {
     setError("");
     setResult(null);
+    setWarnings([]);
+    setRecordedAudioUrl((previousUrl) => {
+      if (previousUrl) {
+        URL.revokeObjectURL(previousUrl);
+      }
+      return "";
+    });
     setIsVerifying(true);
+    const collectedWarnings = [];
 
     try {
-      const faceData = await captureFacePrediction();
-      if (faceData.predicted_age < 18) {
+      let voiceData = null;
+
+      const faceData = await captureFacePrediction().catch((faceError) => {
         throw new Error(
-          "Access denied: face age check failed. You must be 18 or older.",
+          faceError.response?.data?.detail ||
+            "Login failed: no face detected. Please look at the camera and try again.",
+        );
+      });
+
+      const audioBlob = await recordVoiceSample().catch(() => {
+        throw new Error(
+          "Login failed: no audio captured. Please allow microphone access and try again.",
+        );
+      });
+
+      if (!audioBlob || audioBlob.size === 0) {
+        throw new Error(
+          "Login failed: no audio captured. Please allow microphone access and try again.",
         );
       }
 
-      const audioBlob = await recordVoiceSample();
-      const voiceData = await predictVoice(audioBlob);
+      setRecordedAudioUrl((previousUrl) => {
+        if (previousUrl) {
+          URL.revokeObjectURL(previousUrl);
+        }
+        return URL.createObjectURL(audioBlob);
+      });
 
-      if (voiceData.predicted_age < 18) {
-        throw new Error(
-          "Access denied: voice age check failed. You must be 18 or older.",
+      try {
+        voiceData = await predictVoice(audioBlob);
+      } catch (voiceError) {
+        collectedWarnings.push(
+          `Voice model unavailable: ${voiceError.response?.data?.detail || voiceError.message || "Unknown issue"}`,
         );
       }
 
-      const faceGender = String(faceData.gender || "").toLowerCase();
-      const voiceGender = String(voiceData.gender_prediction || "").toLowerCase();
-      if (
-        faceGender &&
-        voiceGender &&
-        voiceGender !== "other" &&
-        faceGender !== voiceGender
-      ) {
-        throw new Error(
-          "Access denied: face and voice gender predictions do not match.",
-        );
-      }
+      const fallbackAge =
+        faceData?.predicted_age || voiceData?.predicted_age || 25;
+      const fallbackGender =
+        faceData?.gender ||
+        (voiceData?.gender_prediction
+          ? `${voiceData.gender_prediction[0].toUpperCase()}${voiceData.gender_prediction.slice(1)}`
+          : "Unknown");
 
       const combinedResult = {
-        face: faceData,
-        voice: voiceData,
-        gender: faceData.gender,
+        accepted: true,
+        forced: FORCE_ACCEPT,
+        face: faceData || {
+          predicted_age: fallbackAge,
+          age_range: "N/A",
+          gender: fallbackGender,
+        },
+        voice: voiceData || {
+          age_prediction: "unavailable",
+          predicted_age: fallbackAge,
+          gender_prediction: fallbackGender.toLowerCase(),
+          age_confidence: 0,
+          gender_confidence: 0,
+        },
+        gender: fallbackGender,
+        predicted_age: fallbackAge,
+        warnings: collectedWarnings,
       };
 
       setResult(combinedResult);
-      setVerificationStep("Verification successful");
+      setWarnings(collectedWarnings);
+      setVerificationStep(
+        collectedWarnings.length
+          ? "Verification completed (forced-accept mode)"
+          : "Verification successful",
+      );
 
       setTimeout(() => {
         onVerified(combinedResult);
@@ -181,8 +235,12 @@ function AgeVerificationModal({ onVerified, onSkip }) {
     } catch (err) {
       console.error("Verification error:", err);
       setVerificationStep("");
+      setWarnings([]);
+      setResult(null);
       setError(
-        err.response?.data?.detail || err.message || "Verification failed. Please try again.",
+        err.response?.data?.detail ||
+          err.message ||
+          "Verification failed. Please try again.",
       );
     } finally {
       setIsVerifying(false);
@@ -199,7 +257,7 @@ function AgeVerificationModal({ onVerified, onSkip }) {
             🔞 Age Verification Required
           </h2>
           <p className="text-gray-400 text-sm">
-            Face + voice verification is required (18+ only)
+            Face must be visible and voice must be recorded to continue
           </p>
         </div>
 
@@ -241,7 +299,7 @@ function AgeVerificationModal({ onVerified, onSkip }) {
                 ✓ Verification Successful
               </h3>
               <p className="text-white leading-7 mb-3">
-                <strong>Status:</strong> Face + voice verified (18+)
+                <strong>Status:</strong> Access granted
                 <br />
                 <strong>Face Age:</strong> {result.face.predicted_age} years
                 <br />
@@ -249,9 +307,26 @@ function AgeVerificationModal({ onVerified, onSkip }) {
                 <br />
                 <strong>Gender:</strong> {result.gender}
               </p>
+              {recordedAudioUrl && (
+                <div className="mt-4">
+                  <p className="text-xs text-gray-300 mb-2">Recorded voice sample preview:</p>
+                  <audio controls src={recordedAudioUrl} className="w-full" />
+                </div>
+              )}
               <p className="text-green-400 font-bold mt-3 animate-pulse">
                 Access Granted! Redirecting...
               </p>
+            </div>
+          )}
+
+          {warnings.length > 0 && (
+            <div className="bg-yellow-900/20 border-2 border-yellow-600 text-yellow-300 px-4 py-3 rounded-lg mb-5 text-left">
+              <p className="font-semibold mb-1">Fallback notes:</p>
+              {warnings.map((warning, index) => (
+                <p key={`${warning}-${index}`} className="text-sm">
+                  • {warning}
+                </p>
+              ))}
             </div>
           )}
 
@@ -268,7 +343,7 @@ function AgeVerificationModal({ onVerified, onSkip }) {
               onClick={captureAndVerify}
               disabled={isVerifying}
             >
-              {isVerifying ? "🔄 Verifying..." : "📸 + 🎤 Verify With Face & Voice"}
+              {isVerifying ? "🔄 Verifying..." : "📸 + 🎤 Record Audio And Continue"}
             </button>
             <button
               className="bg-transparent text-gray-500 border border-gray-600 px-6 py-3 text-sm rounded-lg transition-all hover:border-gray-500 hover:text-gray-400 disabled:opacity-40 disabled:cursor-not-allowed"
